@@ -103,7 +103,7 @@ For an in-depth explanation of KVM in Linux, see [this link](https://prowse.tech
 
 - Run the following command to view the various components that should run in KVM:
 
-    `virt-host-validate`
+    `sudo virt-host-validate`
 
     You should see results similar to the following:
 
@@ -117,12 +117,14 @@ For an in-depth explanation of KVM in Linux, see [this link](https://prowse.tech
     QEMU: Checking for cgroup 'cpu' controller support                         : PASS
     QEMU: Checking for cgroup 'cpuacct' controller support                     : PASS
     QEMU: Checking for cgroup 'cpuset' controller support                      : PASS
-    QEMU: Checking for cgroup 'memory' controller support                      : PASS
+    QEMU: Checking for cgroup 'memory' controller support                  the above should be possible    : PASS
     QEMU: Checking for cgroup 'devices' controller support                     : WARN (Enable 'devices' in kernel Kconfig file or mount/enable cgroup controller in your system)
     QEMU: Checking for cgroup 'blkio' controller support                       : PASS
     QEMU: Checking for device assignment IOMMU support                         : WARN (No ACPI DMAR table found, IOMMU either disabled in BIOS or not supported by this hardware platform)
     QEMU: Checking for secure guest support                                    : WARN (Unknown if this platform has Secure Guest support)   
     ```
+
+    > Be sure to run the command with `sudo` so that you can obtain more accurate results.
 
     > You will also see LXC options. Those are for containerization in Linux which is also supported by libvirt. However, we are only concerned with the "QEMU" items in the list.
 
@@ -145,6 +147,8 @@ Once you verify that it is enabled in the BIOS, configure the following in Debia
 `GRUB_CMDLINE_LINUX="intel_iommu=on"`  
 - Then, `update-grub` or and/or reboot system.
 
+> Note: For Debian 12, this is not necessary as IOMMU works fine out of the box - that is, if it is available on the hardware platform in question, and is enabled in the BIOS/UEFI.
+
 ### Support for other items (devices, freezer, etc)
 
 In `/etc/default/grub` make the following additions:
@@ -157,7 +161,7 @@ And `update-grub` or reboot.
 
 > **Important! Go for CLEAN virt-host-validate results!**
 
-> Note: You might not be able to fully enable all features depending on your hardware configuration. However, if you have a proper server, the above should be possible.
+> Note: You might not be able to fully enable all features depending on your hardware configuration. However, if you have a proper server, you should be able to get a relatively clean set of results. Also, there are alternate ways to configure items (devices, freezer, and so on) such as using the Kconfig file or referencing multiple cgroups). Each system is different! In addition, "freezer" probably won't display proper results because in cgroups v2 a "freezer" doesn't need a separate controller. 
 
 ## Set up a USER ACCOUNT
 
