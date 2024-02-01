@@ -4,15 +4,9 @@ Author: Dave Prowse
 
 [Prowse Tech](https://prowse.tech)
 
-
-
-
-*Corresponding video:*
-
-
-
-
 For this lab I am working on my main system (Core i7, Asus Motherboard) with Debian 12 installed.
+
+Click [**here**](https://www.youtube.com/watch?v=GgAQw08zJzs) for the companion video on YouTube.
 
 ---
 > **NOTE**  
