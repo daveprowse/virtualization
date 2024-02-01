@@ -2,15 +2,17 @@
 
 Author: Dave Prowse  
 
-[Prowse Tech](https://prowse.tech)
+[PROWSE TECH](https://prowse.tech){:target="_blank"}
+
+<a href="https://prowse.tech" target="_blank"> Prowse Tech</a>
 
 For this lab I am working on my main system (Core i7, Asus Motherboard) with Debian 12 installed.
 
-Click [**here**](https://www.youtube.com/watch?v=GgAQw08zJzs) for the companion video on YouTube.
+Click <a href="https://www.youtube.com/watch?v=GgAQw08zJzs" target="_blank"> **here**</a> for the companion video on YouTube.
 
 ---
 > **NOTE**  
-For an in-depth explanation of KVM in Linux, see [this link](https://prowse.tech/kvm/).
+For an in-depth explanation of KVM in Linux, see <a href="https://prowse.tech/kvm/" target="_blank">this link</a>.
 
 ---
 
