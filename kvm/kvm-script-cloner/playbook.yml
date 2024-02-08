@@ -1,0 +1,23 @@
+- hosts: debian
+  tasks:
+  - name: apt-update
+    apt: update_cache=yes
+  - name: apt-upgrade
+    apt: state=latest
+
+- hosts: fedora
+  tasks: 
+  - name: dnf-update-full
+    dnf:
+      name : "*"
+      state: latest
+
+
+- hosts: opensuse
+  tasks:
+  - name: zypper-full-update
+    zypper:
+      name: '*'
+      state: latest
+      type: patch
+    
