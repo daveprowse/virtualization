@@ -1,0 +1,32 @@
+# Proxmox Connection Details
+proxmox_endpoint     = "https://your-proxmox-server.local:8006"
+proxmox_username     = "root@pam"
+proxmox_password     = "your-proxmox-password"
+proxmox_insecure     = true  # Set to false if using valid SSL certificate
+proxmox_ssh_username = "root"
+
+# Proxmox Configuration
+proxmox_node = "pve"  # Your Proxmox node name
+
+# Proxmox Storage Configuration
+# IMPORTANT: Proxmox has different storage types:
+# - Directory storage (local) -> Can store ISOs and snippets
+# - Block storage (ZFS/LVM)   -> Can only store VM disks
+proxmox_datastore_vm       = "local-zfs"  # For VM disks (can be ZFS/LVM)
+proxmox_datastore_iso      = "local"      # For ISO images (must be directory-based)
+proxmox_datastore_snippets = "local"      # For cloud-init snippets (must be directory-based)
+
+proxmox_bridge = "vmbr0"  # Network bridge
+
+# Network Configuration
+gateway = "10.42.88.1"  # Your network gateway
+
+# VM Configuration
+vm_password = "your-secure-password"  # Password for 'sa' user
+
+# SSH Configuration
+ssh_keys = [
+  "ssh-rsa AAAAB3... your-ssh-key-here"
+]
+
+# Note: VMIDs are fixed at 2120, 2121, 2122 for controller, worker1, worker2

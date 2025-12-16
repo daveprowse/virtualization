@@ -1,0 +1,70 @@
+#cloud-config
+hostname: ${hostname}
+
+# Configure SSH at boot (no restart yet - service might not exist)
+bootcmd:
+  - sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+  - timeout 60 bash -c 'until ping -c1 archive.ubuntu.com &>/dev/null; do sleep 2; done'
+
+# Create sa user
+users:
+  - default
+  - name: sa
+    gecos: SA User
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: [users, admin, sudo]
+    lock_passwd: false
+    ssh_authorized_keys:
+      - ${ssh_key}
+
+# Set password
+chpasswd:
+  list: |
+    sa:${vm_password}
+  expire: false
+
+# Enable password authentication
+ssh_pwauth: true
+
+# Configure sudo timeout (60 minutes)
+write_files:
+  - path: /etc/sudoers.d/sa-timeout
+    content: |
+      # Increase sudo timeout to 60 minutes for sa user
+      Defaults:sa timestamp_timeout=60
+    permissions: '0440'
+
+# Minimal packages
+packages:
+  - qemu-guest-agent
+  - python3
+  - python3-pip
+
+runcmd:
+  # Ensure SSH is running and restart to apply config changes from bootcmd
+  - systemctl enable ssh
+  - systemctl start ssh
+  - systemctl restart ssh  # Apply PasswordAuthentication change from bootcmd
+  - systemctl enable sshd
+  - systemctl start sshd
+  - systemctl restart sshd  # Restart sshd too (some systems use this name)
+  
+  # Enable qemu-guest-agent
+  - systemctl enable qemu-guest-agent
+  - systemctl start qemu-guest-agent
+  
+  # Mark cloud-init as complete
+  - touch /home/sa/.cloud-init-complete
+  - chown sa:sa /home/sa/.cloud-init-complete
+  
+  # Disable cloud-init for future boots (MUST BE LAST!)
+  - touch /etc/cloud/cloud-init.disabled
+
+final_message: |
+  ========================================
+  Cloud-init complete!
+  Login: sa
+  
+  MicroK8s will be installed via Ansible.
+  ========================================

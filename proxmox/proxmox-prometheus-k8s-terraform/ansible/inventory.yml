@@ -1,0 +1,30 @@
+all:
+  vars:
+    ansible_user: sa
+    # SSH key configuration:
+    # The key name is set in ansible/group_vars/all.yml (change ssh_key_name there)
+    # This line constructs the full path: ~/.ssh/{ssh_key_name}
+    ansible_ssh_private_key_file: "~/.ssh/{{ ssh_key_name }}"
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+    
+  children:
+    # Standalone servers (non-MicroK8s)
+    standalone:
+      hosts:
+        prom1:
+          ansible_host: 10.42.88.1
+        prom2:
+          ansible_host: 10.42.88.2
+    
+    # MicroK8s cluster nodes
+    microk8s_controller:
+      hosts:
+        k8s-controller:
+          ansible_host: 10.42.88.120
+          
+    microk8s_workers:
+      hosts:
+        k8s-worker1:
+          ansible_host: 10.42.88.121
+        k8s-worker2:
+          ansible_host: 10.42.88.122

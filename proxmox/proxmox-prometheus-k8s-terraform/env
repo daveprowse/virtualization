@@ -1,0 +1,17 @@
+# Project Configuration
+# THIS IS THE ONLY FILE YOU NEED TO EDIT FOR SSH KEY CONFIGURATION
+# All scripts and Ansible will read from this file
+
+# SSH Key Name (just the filename, not the full path)
+# The key should be located at: ~/.ssh/${SSH_KEY_NAME}
+SSH_KEY_NAME=proxmox_key
+
+# VM User (usually 'sa' from cloud-init)
+VM_USER=sa
+
+# VM IP Addresses
+VM_IP_PROM1=10.42.88.1
+VM_IP_PROM2=10.42.88.2
+VM_IP_CONTROLLER=10.42.88.120
+VM_IP_WORKER1=10.42.88.121
+VM_IP_WORKER2=10.42.88.122

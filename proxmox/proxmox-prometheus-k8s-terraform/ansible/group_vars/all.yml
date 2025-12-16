@@ -1,0 +1,9 @@
+# Global variables for all hosts
+# NOTE: ssh_key_name is automatically passed from .env file by deploy.sh
+# You don't need to edit this file - just edit .env instead!
+#
+# However, if running ansible-playbook manually, you can set it here:
+ssh_key_name: proxmox_key  # Fallback if not passed via --extra-vars
+
+# MicroK8s version
+microk8s_channel: "1.34/stable"

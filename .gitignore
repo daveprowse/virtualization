@@ -1,1 +1,5 @@
 .vscode/
+.git-push.sh
+terraform.tfvars
+.env
+
