@@ -1,0 +1,13 @@
+version: 2
+ethernets:
+  eth0:
+    dhcp4: false
+    addresses:
+      - ${ip_address}/24
+    routes:
+      - to: default
+        via: 10.0.2.1
+    nameservers:
+      addresses:
+        - 10.0.2.1
+        - 8.8.8.8
