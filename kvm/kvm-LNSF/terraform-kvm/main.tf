@@ -11,10 +11,24 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+# Custom NAT Network 10.0.2.0/24
+resource "libvirt_network" "lab_network" {
+  name      = "lab-network"
+  mode      = "nat"
+  domain    = "lab.local"
+  addresses = ["10.0.2.0/24"]
+
+  dhcp {
+    enabled = true
+  }
+
+  autostart = true
+}
+
 # Debian Server
 resource "libvirt_volume" "debserver" {
   name   = "LNSF-debserver.qcow2"
-  pool   = "default"
+  pool   = "user-images"
   source = pathexpand("~/kvm-images/debian-13-generic-amd64.qcow2")
   format = "qcow2"
 }
@@ -34,7 +48,8 @@ resource "libvirt_cloudinit_disk" "debserver" {
 }
 
 resource "libvirt_domain" "debserver" {
-  
+  depends_on = [libvirt_network.lab_network]
+
   name   = "LNSF-debserver"
   memory = "4096"
   vcpu   = 2
@@ -46,7 +61,7 @@ resource "libvirt_domain" "debserver" {
   }
 
   network_interface {
-    network_name = "default"
+    network_id = libvirt_network.lab_network.id
   }
 
   console {
@@ -65,7 +80,7 @@ resource "libvirt_domain" "debserver" {
 # Debian Client
 resource "libvirt_volume" "debclient" {
   name   = "LNSF-debclient.qcow2"
-  pool   = "default"
+  pool   = "user-images"
   source = pathexpand("~/kvm-images/debian-13-generic-amd64.qcow2")
   format = "qcow2"
 }
@@ -85,6 +100,7 @@ resource "libvirt_cloudinit_disk" "debclient" {
 }
 
 resource "libvirt_domain" "debclient" {
+  depends_on = [libvirt_network.lab_network]
 
   name   = "LNSF-debclient"
   memory = "8192"
@@ -97,7 +113,7 @@ resource "libvirt_domain" "debclient" {
   }
 
   network_interface {
-    network_name = "default"
+    network_id = libvirt_network.lab_network.id
   }
 
   console {
@@ -116,7 +132,7 @@ resource "libvirt_domain" "debclient" {
 # Ubuntu Server
 resource "libvirt_volume" "ubuntu_server" {
   name   = "LNSF-ubuntu-server.qcow2"
-  pool   = "default"
+  pool   = "user-images"
   source = pathexpand("~/kvm-images/ubuntu-24.04-server-cloudimg-amd64.img")
   format = "qcow2"
 }
@@ -136,6 +152,7 @@ resource "libvirt_cloudinit_disk" "ubuntu_server" {
 }
 
 resource "libvirt_domain" "ubuntu_server" {
+  depends_on = [libvirt_network.lab_network]
 
   name   = "LNSF-ubuntu-server"
   memory = "4096"
@@ -148,7 +165,7 @@ resource "libvirt_domain" "ubuntu_server" {
   }
 
   network_interface {
-    network_name = "default"
+    network_id = libvirt_network.lab_network.id
   }
 
   console {
@@ -167,7 +184,7 @@ resource "libvirt_domain" "ubuntu_server" {
 # CentOS Server
 resource "libvirt_volume" "centos_server" {
   name   = "LNSF-centos-server.qcow2"
-  pool   = "default"
+  pool   = "user-images"
   source = pathexpand("~/kvm-images/centos-stream-10-genericcloud.qcow2")
   format = "qcow2"
 }
@@ -187,6 +204,7 @@ resource "libvirt_cloudinit_disk" "centos_server" {
 }
 
 resource "libvirt_domain" "centos_server" {
+  depends_on = [libvirt_network.lab_network]
 
   name   = "LNSF-centos-server"
   memory = "4096"
@@ -199,7 +217,7 @@ resource "libvirt_domain" "centos_server" {
   }
 
   network_interface {
-    network_name = "default"
+    network_id = libvirt_network.lab_network.id
   }
 
   console {
@@ -218,7 +236,7 @@ resource "libvirt_domain" "centos_server" {
 # Fedora Client
 resource "libvirt_volume" "fedora_client" {
   name   = "LNSF-fedora-client.qcow2"
-  pool   = "default"
+  pool   = "user-images"
   source = pathexpand("~/kvm-images/fedora-41-cloud-base.qcow2")
   format = "qcow2"
 }
@@ -238,6 +256,7 @@ resource "libvirt_cloudinit_disk" "fedora_client" {
 }
 
 resource "libvirt_domain" "fedora_client" {
+  depends_on = [libvirt_network.lab_network]
 
   name   = "LNSF-fed-client"
   memory = "8192"
@@ -250,7 +269,7 @@ resource "libvirt_domain" "fedora_client" {
   }
 
   network_interface {
-    network_name = "default"
+    network_id = libvirt_network.lab_network.id
   }
 
   console {
@@ -269,7 +288,7 @@ resource "libvirt_domain" "fedora_client" {
 # OpenSUSE Server
 resource "libvirt_volume" "opensuse_server" {
   name   = "LNSF-opensuse-server.qcow2"
-  pool   = "default"
+  pool   = "user-images"
   source = pathexpand("~/kvm-images/opensuse-leap-15.6-nocloud.qcow2")
   format = "qcow2"
 }
@@ -289,6 +308,7 @@ resource "libvirt_cloudinit_disk" "opensuse_server" {
 }
 
 resource "libvirt_domain" "opensuse_server" {
+  depends_on = [libvirt_network.lab_network]
 
   name   = "LNSF-opensuse"
   memory = "4096"
@@ -301,7 +321,7 @@ resource "libvirt_domain" "opensuse_server" {
   }
 
   network_interface {
-    network_name = "default"
+    network_id = libvirt_network.lab_network.id
   }
 
   console {

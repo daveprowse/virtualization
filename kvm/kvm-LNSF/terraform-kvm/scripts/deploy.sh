@@ -36,25 +36,15 @@ echo "Step 1: Downloading cloud images..."
 "$SCRIPT_DIR/download-images.sh"
 
 echo ""
-echo "Step 2: Initializing Terraform..."
+echo "Step 2: Creating home directory storage pool..."
+"$SCRIPT_DIR/create-home-pool.sh"
+
+echo ""
+echo "Step 3: Initializing Terraform..."
 terraform init
 
 echo ""
-echo "Step 3: Creating volumes first (will be root-owned)..."
-terraform apply -target=libvirt_volume.debserver \
-                -target=libvirt_volume.debclient \
-                -target=libvirt_volume.ubuntu_server \
-                -target=libvirt_volume.centos_server \
-                -target=libvirt_volume.fedora_client \
-                -target=libvirt_volume.opensuse_server \
-                -auto-approve
-
-echo ""
-echo "Step 4: Fixing volume permissions..."
-"$SCRIPT_DIR/fix-volume-permissions.sh"
-
-echo ""
-echo "Step 5: Creating VMs and cloud-init resources..."
+echo "Step 4: Applying infrastructure..."
 terraform apply -auto-approve
 
 echo ""
@@ -62,11 +52,11 @@ echo "Deployment completed successfully!"
 echo ""
 
 if [ -z "$SKIP_ANSIBLE" ]; then
-    echo "Step 6: Waiting for VMs to be fully booted (60 seconds)..."
+    echo "Step 5: Waiting for VMs to be fully booted (60 seconds)..."
     sleep 60
     
     echo ""
-    echo "Step 7: Running Ansible post-configuration..."
+    echo "Step 6: Running Ansible post-configuration..."
     cd ansible
     ansible-playbook -i inventory.ini configure.yml
     cd ..
@@ -74,7 +64,7 @@ if [ -z "$SKIP_ANSIBLE" ]; then
     echo ""
     echo "Post-configuration completed!"
 else
-    echo "Step 6: Skipping Ansible configuration (not installed)"
+    echo "Step 5: Skipping Ansible configuration (not installed)"
 fi
 
 echo ""

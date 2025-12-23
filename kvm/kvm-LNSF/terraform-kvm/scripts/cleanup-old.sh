@@ -16,6 +16,14 @@ fi
 
 echo ""
 echo "Step 2: Removing any leftover volumes..."
+sudo virsh vol-delete --pool user-images LNSF-debserver.qcow2 2>/dev/null || true
+sudo virsh vol-delete --pool user-images LNSF-debclient.qcow2 2>/dev/null || true
+sudo virsh vol-delete --pool user-images LNSF-ubuntu-server.qcow2 2>/dev/null || true
+sudo virsh vol-delete --pool user-images LNSF-centos-server.qcow2 2>/dev/null || true
+sudo virsh vol-delete --pool user-images LNSF-fedora-client.qcow2 2>/dev/null || true
+sudo virsh vol-delete --pool user-images LNSF-opensuse-server.qcow2 2>/dev/null || true
+
+# Also try default pool
 sudo virsh vol-delete --pool default LNSF-debserver.qcow2 2>/dev/null || true
 sudo virsh vol-delete --pool default LNSF-debclient.qcow2 2>/dev/null || true
 sudo virsh vol-delete --pool default LNSF-ubuntu-server.qcow2 2>/dev/null || true
@@ -24,8 +32,14 @@ sudo virsh vol-delete --pool default LNSF-fedora-client.qcow2 2>/dev/null || tru
 sudo virsh vol-delete --pool default LNSF-opensuse-server.qcow2 2>/dev/null || true
 
 echo ""
-echo "Step 3: Removing cloud-init ISOs..."
-sudo rm -f /var/lib/libvirt/images/LNSF-*-cloudinit.iso
+echo "Step 3: Removing cloud-init ISOs and leftover files..."
+sudo rm -f /var/lib/libvirt/images/LNSF-*
+rm -f ~/kvm-images/LNSF-*
+
+echo ""
+echo "Step 4: Removing custom network (if exists)..."
+sudo virsh net-destroy lab-network 2>/dev/null || true
+sudo virsh net-undefine lab-network 2>/dev/null || true
 
 echo ""
 echo "Cleanup complete! You can now run ./scripts/deploy.sh"
