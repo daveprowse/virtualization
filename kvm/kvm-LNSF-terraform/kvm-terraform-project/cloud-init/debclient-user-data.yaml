@@ -1,0 +1,44 @@
+#cloud-config
+hostname: ${hostname}
+fqdn: ${hostname}.local
+manage_etc_hosts: true
+
+users:
+  - name: root
+    lock_passwd: false
+    hashed_passwd: ${root_password}
+    ssh_authorized_keys:
+      - ${ssh_key}
+  - name: user
+    lock_passwd: false
+    hashed_passwd: ${user_password}
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: sudo
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ${ssh_key}
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - vim
+  - tmux
+  - tilix
+  - openssh-server
+  - gnome-core
+  - gdm3
+  - xorg
+  - xwayland
+
+runcmd:
+  - systemctl set-default graphical.target
+  - sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+  - systemctl restart sshd
+  - update-alternatives --set editor /usr/bin/vim.basic
+  - sed -i 's/#WaylandEnable=false/WaylandEnable=true/' /etc/gdm3/daemon.conf
+  - echo 'ansible_setup_marker' > /tmp/cloudinit_complete
+
+power_state:
+  mode: reboot
+  condition: True

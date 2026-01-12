@@ -1,0 +1,37 @@
+#cloud-config
+hostname: ${hostname}
+fqdn: ${hostname}.local
+manage_etc_hosts: true
+
+users:
+  - name: root
+    lock_passwd: false
+    hashed_passwd: ${root_password}
+    ssh_authorized_keys:
+      - ${ssh_key}
+  - name: user
+    lock_passwd: false
+    hashed_passwd: ${user_password}
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ${ssh_key}
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - vim
+  - tmux
+  - openssh-server
+
+runcmd:
+  - sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+  - systemctl restart sshd
+  - update-alternatives --set editor /usr/bin/vim.basic
+  - echo 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash video=1920x1080"' >> /etc/default/grub
+  - update-grub
+  - echo 'ansible_setup_marker' > /tmp/cloudinit_complete
+
+power_state:
+  mode: reboot
+  condition: True

@@ -1,0 +1,35 @@
+#cloud-config
+hostname: ${hostname}
+fqdn: ${hostname}.local
+manage_etc_hosts: true
+
+users:
+  - name: root
+    lock_passwd: false
+    hashed_passwd: ${root_password}
+    ssh_authorized_keys:
+      - ${ssh_key}
+  - name: user
+    lock_passwd: false
+    hashed_passwd: ${user_password}
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: wheel
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ${ssh_key}
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - vim
+  - tmux
+  - openssh
+
+runcmd:
+  - echo 'export EDITOR=vim' >> /etc/profile
+  - echo 'ansible_setup_marker' > /tmp/cloudinit_complete
+
+power_state:
+  mode: reboot
+  condition: True

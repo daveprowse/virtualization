@@ -1,0 +1,236 @@
+---
+- name: Configure Debian Server
+  hosts: debian_servers
+  become: yes
+  tasks:
+    - name: Wait for cloud-init to complete
+      wait_for:
+        path: /tmp/cloudinit_complete
+        timeout: 600
+
+    - name: Configure console font
+      shell: |
+        echo 'CHARMAP="UTF-8"' > /etc/default/console-setup
+        echo 'CODESET="Lat15"' >> /etc/default/console-setup
+        echo 'FONTFACE="TerminusBold"' >> /etc/default/console-setup
+        echo 'FONTSIZE="16x32"' >> /etc/default/console-setup
+        setupcon
+      args:
+        creates: /etc/default/console-setup.configured
+
+    - name: Mark console setup as configured
+      file:
+        path: /etc/default/console-setup.configured
+        state: touch
+
+- name: Configure Debian Client
+  hosts: debian_clients
+  become: yes
+  tasks:
+    - name: Wait for cloud-init to complete
+      wait_for:
+        path: /tmp/cloudinit_complete
+        timeout: 600
+
+    - name: Install VS Code repository key
+      shell: |
+        wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/packages.microsoft.gpg
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list
+      args:
+        creates: /usr/share/keyrings/packages.microsoft.gpg
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install VS Code
+      apt:
+        name: code
+        state: present
+
+    - name: Download NoMachine
+      get_url:
+        url: https://download.nomachine.com/download/8.14/Linux/nomachine_8.14.2_1_amd64.deb
+        dest: /tmp/nomachine.deb
+
+    - name: Install NoMachine
+      apt:
+        deb: /tmp/nomachine.deb
+
+    - name: Configure GNOME settings for user
+      become_user: user
+      block:
+        - name: Set resolution and scaling
+          shell: |
+            export DISPLAY=:0
+            export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus
+            gsettings set org.gnome.desktop.interface scaling-factor 2
+            gsettings set org.gnome.desktop.interface text-scaling-factor 1.5
+          environment:
+            DISPLAY: ":0"
+
+        - name: Configure terminal font
+          shell: |
+            export DISPLAY=:0
+            export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus
+            profile=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
+            gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/ use-system-font false
+            gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/ font 'Monospace 13'
+            gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/ use-theme-colors false
+            gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/ background-color '#FFFFFF'
+            gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/ foreground-color '#000000'
+          environment:
+            DISPLAY: ":0"
+
+        - name: Set terminal keyboard shortcut
+          shell: |
+            export DISPLAY=:0
+            export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus
+            gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Terminal'
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'gnome-terminal'
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Primary><Alt>t'
+          environment:
+            DISPLAY: ":0"
+
+- name: Configure Ubuntu Server
+  hosts: ubuntu_servers
+  become: yes
+  tasks:
+    - name: Wait for cloud-init to complete
+      wait_for:
+        path: /tmp/cloudinit_complete
+        timeout: 600
+
+    - name: Configure console font
+      shell: |
+        echo 'CHARMAP="UTF-8"' > /etc/default/console-setup
+        echo 'CODESET="Lat15"' >> /etc/default/console-setup
+        echo 'FONTFACE="TerminusBold"' >> /etc/default/console-setup
+        echo 'FONTSIZE="10x20"' >> /etc/default/console-setup
+        setupcon
+      args:
+        creates: /etc/default/console-setup.configured
+
+    - name: Mark console setup as configured
+      file:
+        path: /etc/default/console-setup.configured
+        state: touch
+
+- name: Configure CentOS Server
+  hosts: centos_servers
+  become: yes
+  tasks:
+    - name: Wait for cloud-init to complete
+      wait_for:
+        path: /tmp/cloudinit_complete
+        timeout: 600
+
+    - name: Set console font for root
+      lineinfile:
+        path: /root/.bashrc
+        line: 'setfont ter-v24b'
+        create: yes
+
+    - name: Set console font for user
+      become_user: user
+      lineinfile:
+        path: /home/user/.bashrc
+        line: 'setfont ter-v24b'
+        create: yes
+
+- name: Configure Fedora Client
+  hosts: fedora_clients
+  become: yes
+  tasks:
+    - name: Wait for cloud-init to complete
+      wait_for:
+        path: /tmp/cloudinit_complete
+        timeout: 600
+
+    - name: Import VS Code repository key
+      rpm_key:
+        state: present
+        key: https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Add VS Code repository
+      yum_repository:
+        name: vscode
+        description: Visual Studio Code
+        baseurl: https://packages.microsoft.com/yumrepos/vscode
+        gpgcheck: yes
+        gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Install VS Code
+      dnf:
+        name: code
+        state: present
+
+    - name: Download NoMachine
+      get_url:
+        url: https://download.nomachine.com/download/8.14/Linux/nomachine_8.14.2_1_x86_64.rpm
+        dest: /tmp/nomachine.rpm
+
+    - name: Install NoMachine
+      dnf:
+        name: /tmp/nomachine.rpm
+        state: present
+        disable_gpg_check: yes
+
+    - name: Configure GNOME settings for user
+      become_user: user
+      block:
+        - name: Set resolution and scaling
+          shell: |
+            export DISPLAY=:0
+            export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus
+            gsettings set org.gnome.desktop.interface scaling-factor 2
+            gsettings set org.gnome.desktop.interface text-scaling-factor 1.5
+          environment:
+            DISPLAY: ":0"
+
+        - name: Configure terminal font and dark theme
+          shell: |
+            export DISPLAY=:0
+            export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus
+            profile=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
+            gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/ use-system-font false
+            gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/ font 'Monospace 13'
+            gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/ use-theme-colors false
+            gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/ background-color '#000000'
+            gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/ foreground-color '#FFFFFF'
+          environment:
+            DISPLAY: ":0"
+
+        - name: Set terminal keyboard shortcut
+          shell: |
+            export DISPLAY=:0
+            export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus
+            gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Terminal'
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'gnome-terminal'
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Primary><Alt>t'
+          environment:
+            DISPLAY: ":0"
+
+- name: Configure OpenSUSE Server
+  hosts: opensuse_servers
+  become: yes
+  tasks:
+    - name: Wait for cloud-init to complete
+      wait_for:
+        path: /tmp/cloudinit_complete
+        timeout: 600
+
+    - name: Set console font for root
+      lineinfile:
+        path: /root/.bashrc
+        line: 'setfont ter-v24b'
+        create: yes
+
+    - name: Set console font for user
+      become_user: user
+      lineinfile:
+        path: /home/user/.bashrc
+        line: 'setfont ter-v24b'
+        create: yes
