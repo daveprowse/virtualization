@@ -11,9 +11,17 @@
 - hosts: fedora
   tasks: 
   - name: dnf-update-full
-    dnf:
-      name: "*"
-      state: latest
+    ansible.builtin.command:
+      cmd: dnf upgrade -y
+    register: dnf_upgrade_result
+    changed_when: "'Nothing to do' not in dnf_upgrade_result.stdout"
+
+# - hosts: fedora
+#   tasks: 
+#   - name: dnf-update-full
+#     dnf:
+#       name: "*"
+#       state: latest
 
 
 - hosts: opensuse

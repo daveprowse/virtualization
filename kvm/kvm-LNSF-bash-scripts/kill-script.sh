@@ -21,8 +21,8 @@ virsh undefine LNSF-10.0.2.053-ubuntu-24-server --wipe-storage --remove-all-stor
 virsh destroy LNSF-10.0.2.061-centos-10-stream 
 virsh undefine LNSF-10.0.2.061-centos-10-stream --wipe-storage --remove-all-storage
 
-# virsh destroy LNSF-10.0.2.062-fedora-ws-39 
-# virsh undefine LNSF-10.0.2.062-fedora-ws-39 --wipe-storage --remove-all-storage
+virsh destroy LNSF-10.0.2.062-fedora-ws-43
+virsh undefine LNSF-10.0.2.062-fedora-ws-43 --wipe-storage --remove-all-storage
 
 virsh destroy LNSF-10.0.2.071-opensuse-16
 virsh undefine LNSF-10.0.2.071-opensuse-16 --wipe-storage --remove-all-storage
