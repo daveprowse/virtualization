@@ -2,4 +2,35 @@
 .git-push.sh
 terraform.tfvars
 .env
+.terraform/*
+.terraform.d/*
+terraform.tfstate
+terraform.tfstate.backup
 
+# Terraform files
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Sensitive files
+terraform.tfvars
+*.pem
+*.key
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
